@@ -7,14 +7,14 @@ body {
 
 .header {
     background-color: #f1f1f1;
-    padding: 20px;
+    padding: 10px;
     text-align: center;
-    height: 10vh;
+    height: auto;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: start;
-    gap: 20px;
+    gap: 10px;
 }
 .header-message {
     display: flex;
@@ -23,6 +23,19 @@ body {
     justify-content: center;
     padding: 5px;
     background: orange;
+}
+.header .user {
+    margin-inline-start: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    height: 100%;
+    gap: 10px;
+}
+.header .user * {
+    margin: 0;
+    padding: 0;
 }
 .main {
     display: flex;

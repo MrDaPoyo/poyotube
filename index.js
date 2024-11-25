@@ -23,7 +23,6 @@ const generalMiddleware = (req, res, next) => {
         if (err) {
             res.locals.loggedIn = false;
         } else {
-            console.log(JSON.stringify(decoded));
             var user = await db.getUserById(decoded.id);
             if (!user) {
                 res.clearCookie("auth");
