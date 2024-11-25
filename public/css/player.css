@@ -1,0 +1,90 @@
+.videoPlayerContainer {
+    position: relative;
+    width: 80%;
+    max-width: 800px;
+    margin: 20px auto;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    background: #000;
+    display: flex;
+    align-items: center;
+}
+
+.videoPlayer {
+    height: 100%;
+    display: block;
+    outline: none;
+    margin-inline: auto;
+}
+
+.videoControls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 10; /* Ensure it appears above the video */
+    border-radius: 0 0 12px 12px;
+    box-sizing: border-box;
+}
+
+.controlButton {
+    font-size: 16px;
+    color: #fff;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.controlButton:hover {
+    color: #1db954;
+}
+
+.progressSlider {
+    flex: 1;
+    margin: 0 10px;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 5px;
+    background: #444;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+}
+
+.progressSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #1db954;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.volumeSlider {
+    width: 80px;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 5px;
+    background: #444;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+}
+
+.volumeSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #1db954;
+    border-radius: 50%;
+    cursor: pointer;
+}
