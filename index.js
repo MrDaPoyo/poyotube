@@ -3,6 +3,7 @@ const multer = require('multer');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 var db = require('./db');
+const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 const app = express();
@@ -25,7 +26,7 @@ const loggedInMiddleware = async (req, res, next) => {
             }
         });
     } else {
-        res.redirect('/login');
+        res.redirect('/auth/login');
     }
 }
 
@@ -37,6 +38,38 @@ app.set('view engine', 'ejs');
 app.set('views', './views');
 app.use(cookieParser());
 app.use(generalMiddleware);
+
+app.get('/auth/login', async (req, res) => {
+    res.render('login', {title: "Login"});
+});
+
+app.post('/auth/login', async (req, res) => {
+    const { email, password } = req.body;
+    const user = await db.getUserByEmail(email);
+    if (user) {
+        const match = await bcrypt.compare(password, user.password);
+        if (match) {
+            const token = jwt.sign({ email: user.email, userID: user.userID }, process.env.AUTH_SECRET);
+            res.cookie('loggedIn', token);
+            res.redirect('/');
+        } else {
+            res.status(401).send('Invalid email or password');
+        }
+    } else {
+        res.status(401).send('Invalid email or password');
+    }
+});
+
+app.post('/auth/register', async (req, res) => {
+    const { email, password, username } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    try {
+        await db.addUser(email, username, hashedPassword);
+        res.redirect('/auth/login');
+    } catch (error) {
+        res.status(500).send('Error registering user ' + error);
+    }
+});
 
 var multerStorage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -78,6 +111,10 @@ app.get('/player/:id', async (req, res) => {
     var video = await db.getVideoById(videoId);
     // Logic to fetch and return a specific video by ID
     res.render('player', {title: "Watch!", video: await video, user: await db.getUserById(await video.userID)});
+});
+
+app.get('/upload', loggedInMiddleware, async (req, res) => {
+    res.render('upload', {title: "Upload Video"});
 });
 
 app.post('/upload', loggedInMiddleware, upload.single('video'), async (req, res) => {
