@@ -7,21 +7,21 @@ const port = 3000;
 const url = "https://congenial-space-tribble-r44rx5vwj4wx25544-3000.app.github.dev/";
 
 const generalMiddleware = (req, res, next) => {
-    res.locals.url = url; 
+    res.locals.url = url;
     next();
 }
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('content'));
+app.use(express.static('./public/content'));
 app.set('view engine', 'ejs');
 app.set('views', './views');
 app.use(generalMiddleware);
 
 var multerStorage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, './content/videos');
+        cb(null, './public/content');
     },
     filename: function (req, file, cb) {
         cb(null, file.originalname);
@@ -48,11 +48,17 @@ app.get('/', async (req, res) => {
     res.render('index', {title: "The Video Platform Made For You!", videos: await db.getAllVideos()});
 });
 
-app.get('/player/:id', (req, res) => {
+app.get('/getVideo/:id', async (req, res) => {
     var videoId = req.params.id;
-    videoId = atob(videoId);
+    var video = await db.getVideoById(videoId);
+    res.sendFile(`${await video.fileLocation}`, { root: '.' });
+});
+
+app.get('/player/:id', async (req, res) => {
+    var videoId = req.params.id;
+    var video = await db.getVideoById(videoId);
     // Logic to fetch and return a specific video by ID
-    res.send(`Video with ID: ${videoId}`);
+    res.render('player', {title: await video.title, video: await video});
 });
 
 app.post('/upload', upload.single('video'), async (req, res) => {

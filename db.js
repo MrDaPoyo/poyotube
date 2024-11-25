@@ -70,6 +70,18 @@ function getAllVideos() {
     });
 }
 
+function getVideoById(videoId) {
+    return new Promise((resolve, reject) => {
+        const query = `SELECT * FROM videos WHERE id = ?`;
+        db.get(query, [videoId], (err, row) => {
+            if (err) {
+                reject(err);
+            }
+            resolve(row);
+        });
+    });
+}
+
 function getVideoThumbnailbyId(videoId) {
     return new Promise((resolve, reject) => {
         const query = `SELECT thumbnailLocation FROM videos WHERE id = ?`;
@@ -93,4 +105,4 @@ function addVideo(fileName, fileLocation, fileFullPath, thumbnailLocation, userI
     });
 }
 
-module.exports = { db, setupDB, createUser, hashPassword, getAllVideos, getVideoThumbnailbyId, addVideo };
+module.exports = { db, setupDB, createUser, hashPassword, getAllVideos, getVideoById, getVideoThumbnailbyId, addVideo };
