@@ -12,7 +12,7 @@ app.set('views', './views');
 
 // Routes
 app.get('/', (req, res) => {
-    res.send('Welcome to PoyoTube!');
+    res.render('index', {title: "The Video Platform Made For You!", videos: []});
 });
 
 app.get('/videos', (req, res) => {
