@@ -10,45 +10,48 @@ const app = express();
 const port = 3000;
 const url = process.env.URL_ENTIRE;
 
-const generalMiddleware = async (req, res, next) => {
-    res.locals.url = url;
-    res.locals.message = req.query.message;
-    next();
-}
+const generalMiddleware = (req, res, next) => {
+    const token = req.cookies.auth;
+    res.locals.url = process.env.URL_ENTIRE;
+    res.locals.message = req.query.message || res.locals.message || undefined;
 
-const loggedInMiddleware = (req, res, next) => {
-    cookieParser()(req, res, () => { // Parse the cookies
-        if (req.cookies['loggedIn']) {
-            jwt.verify(req.cookies['auth'], process.env.AUTH_SECRET, (err, decoded) => {
-                if (err) {
-                    res.clearCookie('auth');
-                    res.redirect('/auth/login');
-                } else {
-                    res.locals.user = decoded;
-                    next();
-                }
-            });
+    if (!token) {
+        res.locals.loggedIn = false;
+        return next();
+    }
+
+    jwt.verify(token, process.env.AUTH_SECRET, async (err, decoded) => {
+        if (err) {
+            res.locals.loggedIn = false;
         } else {
-            res.redirect('/auth/login');
+            var user = await db.getUserById(decoded.id);
+            if (!user) {
+                res.clearCookie("auth");
+                return res.redirect("/?message=Invalid auth cookie");
+            } else {
+                res.locals.loggedIn = true;
+                res.locals.user = user;
+                req.user = user;
+            }
         }
+        return next();
     });
-}
+};
 
 const notLoggedInMiddleware = (req, res, next) => {
-    cookieParser()(req, res, () => { // Parse the cookies
-        if (req.cookies['auth']) {
-            jwt.verify(req.cookies['auth'], process.env.AUTH_SECRET, (err, decoded) => {
-                if (err) {
-                    res.clearCookie('auth');
-                    next();
-                } else {
-                    res.redirect('/?message=You are already logged in');
-                }
-            });
-        } else {
-            next();
-        }
-    });
+    if (res.locals.loggedIn) {
+        res.redirect("/");
+    } else {
+        next();
+    }
+};
+
+const loggedInMiddleware = (req, res, next) => {
+    if (!res.locals.loggedIn) {
+        res.redirect("/auth/login");
+    } else {
+        next();
+    }
 }
 
 // Middleware
@@ -61,17 +64,17 @@ app.use(cookieParser());
 app.use(generalMiddleware);
 
 app.get('/auth/login', notLoggedInMiddleware, async (req, res) => {
-    res.render('login', {title: "Login"});
+    res.render('login', { title: "Login" });
 });
 
-app.post('/auth/login', notLoggedInMiddleware,  async (req, res) => {
+app.post('/auth/login', notLoggedInMiddleware, async (req, res) => {
     const { email, password } = req.body;
     const user = await db.getUserByEmail(email);
-    if (await user) {
-        const match = await bcrypt.compare(password, await user.password);
+    if (user) {
+        const match = await bcrypt.compare(password, user.password);
         if (match) {
-            const token = jwt.sign({ email: user.email, userID: user.userID }, process.env.AUTH_SECRET);
-            res.cookie('auth', token);
+            const token = jwt.sign({ id: user.userID }, process.env.AUTH_SECRET, { expiresIn: '1h' });
+            res.cookie('auth', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
             res.redirect('/');
         } else {
             res.status(401).send('Invalid email or password');
@@ -123,28 +126,26 @@ const upload = multer({
 
 // Routes
 app.get('/', async (req, res) => {
-    res.render('index', {title: "The Video Platform Made For You!", videos: await db.getAllVideos()});
+    res.render('index', { title: "The Video Platform Made For You!", videos: await db.getAllVideos() });
 });
 
 app.get('/getVideo/:id', async (req, res) => {
     var videoId = req.params.id;
     var video = await db.getVideoById(videoId);
-    res.sendFile(`${await video.fileLocation}`, { root: '.' });
+    res.sendFile(`${video.fileLocation}`, { root: '.' });
 });
 
 app.get('/player/:id', async (req, res) => {
     var videoId = req.params.id;
     var video = await db.getVideoById(videoId);
-    // Logic to fetch and return a specific video by ID
-    res.render('player', {title: "Watch!", video: await video, user: await db.getUserById(await video.userID)});
+    res.render('player', { title: "Watch!", video: video, user: await db.getUserById(video.userID) });
 });
 
 app.get('/upload', loggedInMiddleware, async (req, res) => {
-    res.render('upload', {title: "Upload Video"});
+    res.render('upload', { title: "Upload Video" });
 });
 
 app.post('/upload', loggedInMiddleware, upload.single('video'), async (req, res) => {
-    // Logic to handle video upload
     const fileName = req.file.originalname.split('.')[0] + '-' + Date.now() + '.mp4';
     const fileLocation = req.file.path;
     const fileFullPath = req.file.destination + '/' + req.file.filename;
@@ -155,10 +156,10 @@ app.post('/upload', loggedInMiddleware, upload.single('video'), async (req, res)
     const videoTitle = req.body.videoTitle || fileName.split('.')[0];
     const videoDescription = req.body.videoDescription || 'No description provided';
     try {
-        db.addVideo(fileName, fileLocation, fileFullPath, thumbnailLocation, userID, fileSize, fileLength, videoTitle, videoDescription);
-        return res.render("index", {title: "The Video Platform Made For You!", videos: await db.getAllVideos()});
+        await db.addVideo(fileName, fileLocation, fileFullPath, thumbnailLocation, userID, fileSize, fileLength, videoTitle, videoDescription);
+        res.render("index", { title: "The Video Platform Made For You!", videos: await db.getAllVideos() });
     } catch (error) {
-        return res.status(500).send('Error adding video to the database ' + err);
+        res.status(500).send('Error adding video to the database ' + error);
     }
 });
 
