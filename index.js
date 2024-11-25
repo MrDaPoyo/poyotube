@@ -8,7 +8,6 @@ require('dotenv').config();
 
 const app = express();
 const port = 3000;
-const url = process.env.URL_ENTIRE;
 
 const generalMiddleware = (req, res, next) => {
     const token = req.cookies.auth;
@@ -24,6 +23,7 @@ const generalMiddleware = (req, res, next) => {
         if (err) {
             res.locals.loggedIn = false;
         } else {
+            console.log(JSON.stringify(decoded));
             var user = await db.getUserById(decoded.id);
             if (!user) {
                 res.clearCookie("auth");
@@ -73,7 +73,7 @@ app.post('/auth/login', notLoggedInMiddleware, async (req, res) => {
     if (user) {
         const match = await bcrypt.compare(password, user.password);
         if (match) {
-            const token = jwt.sign({ id: user.userID }, process.env.AUTH_SECRET, { expiresIn: '1h' });
+            const token = jwt.sign({ id: user.id }, process.env.AUTH_SECRET, { expiresIn: '1h' });
             res.cookie('auth', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
             res.redirect('/');
         } else {
