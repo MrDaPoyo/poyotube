@@ -1,12 +1,9 @@
 <%- include('header.ejs') %>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"
-        integrity="sha512-U2WE1ktpMTuRBPoCFDzomoIorbOyUv0sP8B+INA3EzNAhehbzED1rOJg6bCqPf/Tuposxb5ja/MAUnC8THSbLQ=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/basic.css"
-        integrity="sha512-+Vla3mZvC+lQdBu1SKhXLCbzoNCl0hQ8GtCK8+4gOJS/PN9TTn0AO6SxlpX8p+5Zoumf1vXFyMlhpQtVD5+eSw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <h2>Video List</h2>
     <div class="videoList">
+        <% if (videos.length === 0) { %>
+            <p>No videos found</p>
+        <% } %>
         <% videos.forEach(function(video) { %>
             <div class="column-container">
                 <h2>
@@ -22,20 +19,4 @@
             </div>
             <% }); %>
     </div>
-    <h2>Upload Video</h2>
-    <form action="/upload" class="dropzone" id="videoDropzone"></form>
-    <script>
-        Dropzone.options.videoDropzone = {
-            paramName: "video", // The name that will be used to transfer the file
-            maxFilesize: 1000000000, // MB
-            acceptedFiles: ".mp4",
-            init: function () {
-                this.on("success", function (file, response) {
-                    // Handle the response from the server
-                    console.log(response);
-                });
-            }
-        };
-    </script>
-
     <%- include('footer.ejs') %>

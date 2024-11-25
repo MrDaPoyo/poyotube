@@ -14,12 +14,12 @@
     <header class="header">
         <h1><a class="hidden-link" href="/">PoyoTube!</a> - <%= title %>
         </h1>
-        <% if (typeof message !==undefined && message) { %>
-            <div class="header-message">
-                <p>
-                    <%= message %>
-                </p>
-            </div>
-            <% } %>
     </header>
+    <% if (typeof message !==undefined && message) { %>
+        <div class="header-message">
+            <p>
+                <%= message %>
+            </p>
+        </div>
+    <% } %>
     <main class="main">
