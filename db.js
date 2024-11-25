@@ -47,9 +47,9 @@ function hashPassword(password) {
     });
 }
 
-function createUser(name, email, password) {
-    const insert = `INSERT INTO users (name, email, password) VALUES (?, ?, ?)`;
-    db.run(insert, [name, email, password], (err) => {
+function createUser(username, email, password) {
+    const insert = `INSERT INTO users (username, email, password) VALUES (?, ?, ?)`;
+    db.run(insert, [username, email, password], (err) => {
         if (err) {
             console.error(err.message);
             throw err;
@@ -62,6 +62,18 @@ function getUserById(userId) {
     return new Promise((resolve, reject) => {
         const query = `SELECT * FROM users WHERE id = ?`;
         db.get(query, [userId], (err, row) => {
+            if (err) {
+                reject(err);
+            }
+            resolve(row);
+        });
+    });
+}
+
+function getUserByEmail(email) {
+    return new Promise((resolve, reject) => {
+        const query = `SELECT * FROM users WHERE email = ?`;
+        db.get(query, [email], (err, row) => {
             if (err) {
                 reject(err);
             }
@@ -117,4 +129,4 @@ function addVideo(fileName, fileLocation, fileFullPath, thumbnailLocation, userI
     });
 }
 
-module.exports = { db, setupDB, createUser, getUserById, hashPassword, getAllVideos, getVideoById, getVideoThumbnailbyId, addVideo };
+module.exports = { db, setupDB, createUser, getUserById, getUserByEmail, hashPassword, getAllVideos, getVideoById, getVideoThumbnailbyId, addVideo };

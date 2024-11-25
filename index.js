@@ -16,19 +16,39 @@ const generalMiddleware = async (req, res, next) => {
     next();
 }
 
-const loggedInMiddleware = async (req, res, next) => {
-    if (req.cookies['loggedIn']) {
-        jwt.verify(req.cookies['loggedIn'], process.env.AUTH_SECRET, (err, decoded) => {
-            if (err) {
-                res.redirect('/login');
-            } else {
-                res.locals.user = decoded;
-                next();
-            }
-        });
-    } else {
-        res.redirect('/auth/login');
-    }
+const loggedInMiddleware = (req, res, next) => {
+    cookieParser()(req, res, () => { // Parse the cookies
+        if (req.cookies['loggedIn']) {
+            jwt.verify(req.cookies['auth'], process.env.AUTH_SECRET, (err, decoded) => {
+                if (err) {
+                    res.clearCookie('auth');
+                    res.redirect('/auth/login');
+                } else {
+                    res.locals.user = decoded;
+                    next();
+                }
+            });
+        } else {
+            res.redirect('/auth/login');
+        }
+    });
+}
+
+const notLoggedInMiddleware = (req, res, next) => {
+    cookieParser()(req, res, () => { // Parse the cookies
+        if (req.cookies['auth']) {
+            jwt.verify(req.cookies['auth'], process.env.AUTH_SECRET, (err, decoded) => {
+                if (err) {
+                    res.clearCookie('auth');
+                    next();
+                } else {
+                    res.redirect('/?message=You are already logged in');
+                }
+            });
+        } else {
+            next();
+        }
+    });
 }
 
 // Middleware
@@ -40,18 +60,18 @@ app.set('views', './views');
 app.use(cookieParser());
 app.use(generalMiddleware);
 
-app.get('/auth/login', async (req, res) => {
+app.get('/auth/login', notLoggedInMiddleware, async (req, res) => {
     res.render('login', {title: "Login"});
 });
 
-app.post('/auth/login', async (req, res) => {
+app.post('/auth/login', notLoggedInMiddleware,  async (req, res) => {
     const { email, password } = req.body;
     const user = await db.getUserByEmail(email);
-    if (user) {
-        const match = await bcrypt.compare(password, user.password);
+    if (await user) {
+        const match = await bcrypt.compare(password, await user.password);
         if (match) {
             const token = jwt.sign({ email: user.email, userID: user.userID }, process.env.AUTH_SECRET);
-            res.cookie('loggedIn', token);
+            res.cookie('auth', token);
             res.redirect('/');
         } else {
             res.status(401).send('Invalid email or password');
@@ -61,15 +81,20 @@ app.post('/auth/login', async (req, res) => {
     }
 });
 
-app.post('/auth/register', async (req, res) => {
+app.post('/auth/register', notLoggedInMiddleware, async (req, res) => {
     const { email, password, username } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     try {
-        await db.createUser(email, username, hashedPassword);
+        await db.createUser(username, email, hashedPassword);
         res.redirect('/auth/login?message=Registration successful, please login to continue');
     } catch (error) {
         res.status(500).send('Error registering user ' + error);
     }
+});
+
+app.get('/auth/logout', loggedInMiddleware, async (req, res) => {
+    res.clearCookie('auth');
+    res.redirect('/auth/login?message=You have been logged out');
 });
 
 var multerStorage = multer.diskStorage({
