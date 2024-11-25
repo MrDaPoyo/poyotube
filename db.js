@@ -29,6 +29,8 @@ function setupDB() {
             fileLenght INTEGER DEFAULT 0 NOT NULL,            -- Duration of the file in seconds
             status TEXT DEFAULT 'active',			-- Status of the file (e.g., active, archived, deleted)
             statusLastModifiedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+            videoTitle TEXT NOT NULL DEFAULT 'No title provided',
+            videoDescription TEXT NOT NULL DEFAULT 'No description provided',
             FOREIGN KEY (userID) REFERENCES users(id))`);
 }
 
@@ -80,4 +82,15 @@ function getVideoThumbnailbyId(videoId) {
     });
 }
 
-module.exports = { db, setupDB, createUser, hashPassword, getAllVideos, getVideoThumbnailbyId };
+function addVideo(fileName, fileLocation, fileFullPath, thumbnailLocation, userID, fileSize, fileLenght, videoTitle, videoDescription) {
+    const insert = `INSERT INTO videos (fileName, fileLocation, fileFullPath, thumbnailLocation, userID, fileSize, fileLenght, videoTitle, videoDescription) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    db.run(insert, [fileName, fileLocation, fileFullPath, thumbnailLocation, userID, fileSize, fileLenght, videoTitle, videoDescription], (err) => {
+        if (err) {
+            console.error(err.message);
+            throw err;
+        }
+        console.log('A new video has been created.');
+    });
+}
+
+module.exports = { db, setupDB, createUser, hashPassword, getAllVideos, getVideoThumbnailbyId, addVideo };
