@@ -12,6 +12,7 @@ const url = process.env.URL_ENTIRE;
 
 const generalMiddleware = async (req, res, next) => {
     res.locals.url = url;
+    res.locals.message = req.query.message;
     next();
 }
 
@@ -64,8 +65,8 @@ app.post('/auth/register', async (req, res) => {
     const { email, password, username } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     try {
-        await db.addUser(email, username, hashedPassword);
-        res.redirect('/auth/login');
+        await db.createUser(email, username, hashedPassword);
+        res.redirect('/auth/login?message=Registration successful, please login to continue');
     } catch (error) {
         res.status(500).send('Error registering user ' + error);
     }

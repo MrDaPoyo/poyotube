@@ -58,6 +58,18 @@ function createUser(name, email, password) {
     });
 }
 
+function getUserById(userId) {
+    return new Promise((resolve, reject) => {
+        const query = `SELECT * FROM users WHERE id = ?`;
+        db.get(query, [userId], (err, row) => {
+            if (err) {
+                reject(err);
+            }
+            resolve(row);
+        });
+    });
+}
+
 function getAllVideos() {
     return new Promise((resolve, reject) => {
         const query = `SELECT * FROM videos`;
@@ -105,4 +117,4 @@ function addVideo(fileName, fileLocation, fileFullPath, thumbnailLocation, userI
     });
 }
 
-module.exports = { db, setupDB, createUser, hashPassword, getAllVideos, getVideoById, getVideoThumbnailbyId, addVideo };
+module.exports = { db, setupDB, createUser, getUserById, hashPassword, getAllVideos, getVideoById, getVideoThumbnailbyId, addVideo };
