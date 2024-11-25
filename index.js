@@ -58,7 +58,7 @@ app.get('/player/:id', async (req, res) => {
     var videoId = req.params.id;
     var video = await db.getVideoById(videoId);
     // Logic to fetch and return a specific video by ID
-    res.render('player', {title: await video.title, video: await video});
+    res.render('player', {title: await video.videoTitle, video: await video});
 });
 
 app.post('/upload', upload.single('video'), async (req, res) => {

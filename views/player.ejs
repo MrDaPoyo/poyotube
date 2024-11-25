@@ -1,5 +1,4 @@
 <%- include('header.ejs') %>
-
 <script>
     fetch('/getVideo/<%= video.id %>')
         .then(response => response.blob())
@@ -11,3 +10,6 @@
         })
         .catch(error => console.error('Error fetching video:', error));
 </script>
+<h2><%= video.videoTitle %></h2>
+<p><%= video.videoDescription %></p>
+<%- include('footer.ejs') %>
