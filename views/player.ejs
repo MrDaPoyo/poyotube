@@ -6,10 +6,12 @@
             const videoElement = document.createElement('video');
             videoElement.src = URL.createObjectURL(blob);
             videoElement.controls = true;
-            document.body.appendChild(videoElement);
+            document.getElementById("videoPlayer").appendChild(videoElement);
         })
         .catch(error => console.error('Error fetching video:', error));
 </script>
+<div class="videoPlayer" id="videoPlayer">
+</div> 
 <h2><%= video.videoTitle %></h2>
 <p><%= video.videoDescription %></p>
 <%- include('footer.ejs') %>

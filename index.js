@@ -14,7 +14,7 @@ const generalMiddleware = (req, res, next) => {
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('./public/content'));
+app.use(express.static('./public'));
 app.set('view engine', 'ejs');
 app.set('views', './views');
 app.use(generalMiddleware);
@@ -58,7 +58,7 @@ app.get('/player/:id', async (req, res) => {
     var videoId = req.params.id;
     var video = await db.getVideoById(videoId);
     // Logic to fetch and return a specific video by ID
-    res.render('player', {title: await video.videoTitle, video: await video});
+    res.render('player', {title: "Watch!", video: await video});
 });
 
 app.post('/upload', upload.single('video'), async (req, res) => {
