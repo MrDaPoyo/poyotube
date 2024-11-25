@@ -1,14 +1,32 @@
 const express = require('express');
 const multer = require('multer');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 var db = require('./db');
+require('dotenv').config();
 
 const app = express();
 const port = 3000;
-const url = "https://congenial-space-tribble-r44rx5vwj4wx25544-3000.app.github.dev/";
+const url = process.env.URL_ENTIRE;
 
-const generalMiddleware = (req, res, next) => {
+const generalMiddleware = async (req, res, next) => {
     res.locals.url = url;
     next();
+}
+
+const loggedInMiddleware = async (req, res, next) => {
+    if (req.cookies['loggedIn']) {
+        jwt.verify(req.cookies['loggedIn'], process.env.AUTH_SECRET, (err, decoded) => {
+            if (err) {
+                res.redirect('/login');
+            } else {
+                res.locals.user = decoded;
+                next();
+            }
+        });
+    } else {
+        res.redirect('/login');
+    }
 }
 
 // Middleware
@@ -17,6 +35,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('./public'));
 app.set('view engine', 'ejs');
 app.set('views', './views');
+app.use(cookieParser());
 app.use(generalMiddleware);
 
 var multerStorage = multer.diskStorage({
@@ -58,10 +77,10 @@ app.get('/player/:id', async (req, res) => {
     var videoId = req.params.id;
     var video = await db.getVideoById(videoId);
     // Logic to fetch and return a specific video by ID
-    res.render('player', {title: "Watch!", video: await video});
+    res.render('player', {title: "Watch!", video: await video, user: await db.getUserById(await video.userID)});
 });
 
-app.post('/upload', upload.single('video'), async (req, res) => {
+app.post('/upload', loggedInMiddleware, upload.single('video'), async (req, res) => {
     // Logic to handle video upload
     const fileName = req.file.originalname.split('.')[0] + '-' + Date.now() + '.mp4';
     const fileLocation = req.file.path;

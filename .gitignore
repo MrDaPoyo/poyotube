@@ -1,3 +1,4 @@
 node_modules
 poyotube.db
 public/content/*
+.env

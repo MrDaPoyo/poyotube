@@ -6,25 +6,23 @@
         integrity="sha512-+Vla3mZvC+lQdBu1SKhXLCbzoNCl0hQ8GtCK8+4gOJS/PN9TTn0AO6SxlpX8p+5Zoumf1vXFyMlhpQtVD5+eSw=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <h2>Video List</h2>
-    <ul>
+    <div class="videoList">
         <% videos.forEach(function(video) { %>
-            <li>
+            <div class="column-container">
                 <h2>
                     <%= video.title %>
                 </h2>
-                <video width="320" height="240" controls>
-                    <source src="<%= url + 'content/' + video.fileName %>" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
+                <%= JSON.stringify(video) %>
+                <img width="320" height="240" src="<%= url + 'content/' + video.filePath %>" type="video/mp4">
                 <a href="<%= url + 'player/' + video.id %>">
                     <%= video.videoTitle %>
                 </a>
                 <p>
                     <%= video.videoDescription %>
                 </p>
-            </li>
+            </div>
             <% }); %>
-    </ul>
+    </div>
     <h2>Upload Video</h2>
     <form action="/upload" class="dropzone" id="videoDropzone"></form>
     <script>

@@ -12,6 +12,8 @@ body {
     height: 10vh;
     display: flex;
     flex-direction: row;
+    align-items: center;
+    justify-content: start;
     gap: 20px;
 }
 .main {
@@ -20,4 +22,21 @@ body {
     padding: 20px;
     padding: 20px;
     height: 80vh;
+}
+
+.row-container {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+.column-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.hidden-link {
+    text-decoration: none;
+    color: black;
 }
