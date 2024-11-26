@@ -18,3 +18,5 @@ function generateThumbnail(videoPath, outputDir, timestamp = '00:00:01') {
             .on('error', (err) => reject(err));
     });
 }
+
+module.exports = generateThumbnail;
