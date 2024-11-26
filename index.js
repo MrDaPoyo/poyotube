@@ -125,7 +125,8 @@ const upload = multer({
 
 // Routes
 app.get('/', async (req, res) => {
-    res.render('index', { title: "The Video Platform Made For You!", videos: await db.getAllVideos() });
+    const videos = await db.getAllVideos();
+    res.render('index', { title: "The Video Platform Made For You!", videos: await videos.reverse() });
 });
 
 app.get('/getVideo/:id', async (req, res) => {
