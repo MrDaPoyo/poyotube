@@ -5,6 +5,10 @@ const jwt = require('jsonwebtoken');
 var db = require('./db');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
+const detectNSFW = require('./nsfw'); // Import the NSFW detection module
+const generateThumbnail = require('./thumbnails'); // Thumbnail generator function
+const path = require('path');
+const fs = require('fs-extra');
 
 const app = express();
 const port = 3000;
@@ -145,22 +149,60 @@ app.get('/player/:id', async (req, res) => {
 app.get('/upload', loggedInMiddleware, async (req, res) => {
     res.render('upload', { title: "Upload Video" });
 });
-
 app.post('/upload', loggedInMiddleware, upload.single('video'), async (req, res) => {
-    const fileName = req.file.originalname.split('.')[0] + '-' + Date.now() + '.mp4';
-    const fileLocation = req.file.path;
-    const fileFullPath = req.file.destination + '/' + req.file.filename;
-    const thumbnailLocation = ''; // You can add logic to generate and save a thumbnail
-    const userID = req.user.id || 1; // Assuming userID is sent in the request body
+    const originalName = req.file.originalname.split('.')[0];
+    const timestamp = Date.now();
+    const fileName = `${originalName}-${timestamp}.mp4`;
+    const fileLocation = req.file.path; // Temporary location provided by Multer
+    const fileFullPath = path.join(req.file.destination, fileName); // Final location
+    const thumbnailDir = './public/thumbnails'; // Directory to save thumbnails
+    const userID = req.user.id || 1; // Assuming userID is available
     const fileSize = req.file.size;
-    const fileLength = ''; // You can add logic to calculate the video length
-    const videoTitle = req.body.videoTitle || fileName.split('.')[0];
+    const videoTitle = req.body.videoTitle || originalName;
     const videoDescription = req.body.videoDescription || 'No description provided';
+    const frameInterval = 5; // Analyze a frame every 5 seconds for NSFW detection
+
+    let thumbnailLocation = '';
+
     try {
-        await db.addVideo(fileName, fileLocation, fileFullPath, thumbnailLocation, userID, fileSize, fileLength, videoTitle, videoDescription);
-        res.render("index", { title: "The Video Platform Made For You!", videos: await db.getAllVideos() });
+        // Ensure the destination directory exists
+        fs.ensureDirSync(req.file.destination);
+
+        // Rename/move the file to the final location
+        fs.renameSync(fileLocation, fileFullPath);
+
+        // Step 1: Detect NSFW Content
+        console.log('Detecting NSFW content in:', fileFullPath);
+        const isNSFW = await detectNSFW(fileFullPath, './frames', frameInterval);
+        if (isNSFW) {
+            // Delete the video if NSFW is detected
+            fs.unlinkSync(fileFullPath);
+            return res.status(400).send('The uploaded video contains NSFW content and was rejected.');
+        }
+
+        // Step 2: Generate Thumbnail
+        console.log('Generating thumbnail for:', fileFullPath);
+        thumbnailLocation = await generateThumbnail(fileFullPath, thumbnailDir);
+
+        // Step 3: Save Video Details to Database
+        console.log('Saving video details to the database...');
+        await db.addVideo(fileName, fileFullPath, thumbnailLocation, userID, fileSize, videoTitle, videoDescription);
+
+        // Step 4: Render Index with All Videos
+        const videos = await db.getAllVideos();
+        res.render('index', {
+            title: 'The Video Platform Made For You!',
+            videos: videos.reverse(), // Show the latest video first
+        });
     } catch (error) {
-        res.status(500).send('Error adding video to the database ' + error);
+        console.error('Error processing video upload:', error);
+
+        // Cleanup in case of errors
+        if (fs.existsSync(fileFullPath)) {
+            fs.unlinkSync(fileFullPath);
+        }
+
+        res.status(500).send('Error processing video upload: ' + error.message);
     }
 });
 
