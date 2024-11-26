@@ -1,14 +1,11 @@
 <%- include('header.ejs') %>
     <h2>Video List</h2>
-    <div class="videoList">
+    <div class="feed">
         <% if (videos.length === 0) { %>
             <p>No videos found</p>
         <% } %>
         <% videos.forEach(function(video) { %>
-            <div class="column-container">
-                <h2>
-                    <%= video.title %>
-                </h2>
+            <div class="column-container video">
                 <img width="320" height="240" src="<%= url + 'content/' + video.filePath %>" type="video/mp4">
                 <a href="<%= url + 'player/' + video.id %>">
                     <%= video.videoTitle %>
