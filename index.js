@@ -151,7 +151,7 @@ app.post('/upload', loggedInMiddleware, upload.single('video'), async (req, res)
     const fileLocation = req.file.path;
     const fileFullPath = req.file.destination + '/' + req.file.filename;
     const thumbnailLocation = ''; // You can add logic to generate and save a thumbnail
-    const userID = req.body.userID || 1; // Assuming userID is sent in the request body
+    const userID = req.user.id || 1; // Assuming userID is sent in the request body
     const fileSize = req.file.size;
     const fileLength = ''; // You can add logic to calculate the video length
     const videoTitle = req.body.videoTitle || fileName.split('.')[0];

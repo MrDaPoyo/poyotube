@@ -1,8 +1,7 @@
 <%- include("header.ejs") %>
     <div class="container">
-        <h1 class="text-center">Login</h1>
+        <h2>Login</h2>
         <form action="/auth/login" method="POST">
-
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" name="email" required>
@@ -29,6 +28,7 @@
             <div class="form-group">
                 <label for="password">Password</label>
                 <input type="password" name="password" required>
+                <br>
                 <input type="submit" value="Register">
             </div>
         </form>
