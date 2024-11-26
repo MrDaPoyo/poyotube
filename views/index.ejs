@@ -6,7 +6,7 @@
         <% } %>
         <% videos.forEach(function(video) { %>
             <div class="column-container video">
-                <img width="320" height="240" src="<%= url + 'thumbnails/' + video.filePath %>" type="video/mp4">
+                <img width="320" height="240" src="<%= url + video.thumbnailLocation.replace('public/', '') %>" type="video/mp4">
                 <a href="<%= url + 'player/' + video.id %>">
                     <%= video.videoTitle %>
                 </a>

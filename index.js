@@ -158,9 +158,10 @@ app.post('/upload', loggedInMiddleware, upload.single('video'), async (req, res)
     const thumbnailDir = './public/thumbnails'; // Directory to save thumbnails
     const userID = req.user.id || 1; // Assuming userID is available
     const fileSize = req.file.size;
-    const videoTitle = req.body.videoTitle || originalName;
+    const videoTitle = req.body.videoTitle || originalName || 'No title provided';
     const videoDescription = req.body.videoDescription || 'No description provided';
     const frameInterval = 5; // Analyze a frame every 5 seconds for NSFW detection
+    const fileLength = 0; // Placeholder for video length
 
     let thumbnailLocation = '';
 
@@ -186,8 +187,7 @@ app.post('/upload', loggedInMiddleware, upload.single('video'), async (req, res)
 
         // Step 3: Save Video Details to Database
         console.log('Saving video details to the database...');
-        await db.addVideo(fileName, fileFullPath, thumbnailLocation, userID, fileSize, videoTitle, videoDescription);
-
+        await db.addVideo(fileName, fileLocation, fileFullPath, thumbnailLocation, userID, fileSize, fileLength, videoTitle, videoDescription);
         // Step 4: Render Index with All Videos
         const videos = await db.getAllVideos();
         res.render('index', {
