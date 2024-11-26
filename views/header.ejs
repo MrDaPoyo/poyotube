@@ -12,13 +12,15 @@
 
 <body>
     <header class="header">
-        <h1><a class="hidden-link" href="/">PoyoTube!</a> - <%= title %></h1>
+        <h3><a class="hidden-link" href="/">PoyoTube!</a> - <%= title %></h3>
         <div class="user">
             <div class="column-container">
                 <% if (typeof user !== 'undefined' && user) { %>
                     <p>Welcome, <%= user.username %></p>
+                    <div class="row-container">
                     <a href="/upload" class="upload">Upload a video!</a>
                     <a href="/auth/logout" class="logout">Logout</a>    
+                    </div>
                 <% } else { %>
                     <a href="/auth/login" class="login">Login/Register</a>
                 <% } %>
