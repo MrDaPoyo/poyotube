@@ -42,9 +42,11 @@
             var formData = new FormData();
             formData.append("videoTitle", document.getElementById("videoTitle").value);
             formData.append("videoDescription", document.getElementById("videoDescription").value);
+            formData.append("jwt", '<%= jwt %>');
             myDropzone.on("sending", function (file, xhr, formData) {
                 formData.append("videoTitle", document.getElementById("videoTitle").value);
                 formData.append("videoDescription", document.getElementById("videoDescription").value);
+                formData.append("jwt", '<%= jwt %>');
             });
             myDropzone.processQueue();
         });

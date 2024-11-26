@@ -28,6 +28,7 @@ const generalMiddleware = (req, res, next) => {
                 res.clearCookie("auth");
                 return res.redirect("/?message=Invalid auth cookie");
             } else {
+                res.locals.jwt = token;
                 res.locals.loggedIn = true;
                 res.locals.user = user;
                 req.user = user;
