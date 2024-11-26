@@ -1,4 +1,5 @@
 node_modules
 poyotube.db
 public/content/*
+public/thumbnais/*
 .env

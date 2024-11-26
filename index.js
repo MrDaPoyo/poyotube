@@ -137,7 +137,7 @@ app.get('/', async (req, res) => {
 app.get('/getVideo/:id', async (req, res) => {
     var videoId = req.params.id;
     var video = await db.getVideoById(videoId);
-    res.sendFile(`${video.fileLocation}`, { root: '.' });
+    res.sendFile(`${video.fileFullPath}`, { root: '.' });
 });
 
 app.get('/player/:id', async (req, res) => {
