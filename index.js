@@ -11,7 +11,7 @@ const path = require('path');
 const fs = require('fs-extra');
 
 const app = express();
-const port = 3000;
+const port = 80;
 
 const generalMiddleware = (req, res, next) => {
     const token = req.cookies.auth;

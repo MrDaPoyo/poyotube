@@ -11,3 +11,11 @@ So far you can:
 - Logout
 - Upload Videos
 - Watch Videos
+
+### How do I set it up?
+
+Just run `npm i` and then `apt install ffmpeg`. Finally, add this into your `.env` file:
+```
+URL_ENTIRE=http://localhost:80/
+AUTH_SECRET=thisisatestsecret
+```
